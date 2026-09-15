@@ -1,0 +1,5 @@
+[project]
+name = "jake-makes-manim-lab"
+version = "1.0.0"
+requires-python = ">=3.12,<3.14"
+dependencies = ["manim==0.21.0"]
