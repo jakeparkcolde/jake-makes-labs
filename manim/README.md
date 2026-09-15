@@ -66,3 +66,5 @@ Manim CLI를 직접 실행할 때 PATH가 잡히지 않으면 프로젝트 안�
 ## 실제 출력 파일
 
 [빠른 동작 Plain.mp4](examples/Plain.mp4)와 [설명을 추가한 Explained.mp4](examples/Explained.mp4)를 함께 제공합니다. 새 Python 3.12.13 환경에서도 두 장면의 저화질 렌더와 코드의 정렬 검사를 통과했습니다.
+
+[실습 자료 ZIP 다운로드](https://github.com/jakeparkcolde/jake-makes-labs/raw/refs/heads/main/manim/jake-makes-manim-lab-v1.zip)
