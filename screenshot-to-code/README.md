@@ -1,5 +1,7 @@
 # 스크린샷 한 장을 실제 웹페이지로 · Jake Makes
 
+[본편 보기](https://youtu.be/X_B0AfMNUa0) · [쇼츠 보기](https://www.youtube.com/shorts/dF8rLvAF_ug) · [전체 실습 자료 다운로드](https://github.com/jakeparkcolde/jake-makes-labs/releases/download/screenshot-to-code-v1/screenshot-to-code-practice-v1.zip)
+
 영상에서 사용한 입력 디자인, 글자 없는 제품 사진, 첫 출력, 최종 코드와 실제 수정 요청문입니다. PULSE는 가상의 실습용 브랜드입니다.
 
 - [입력 디자인 PNG](source-design-v1.png)
