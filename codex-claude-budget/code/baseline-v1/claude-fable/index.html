@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>같은 가계부</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar__inner">
+      <a class="brand" href="#" id="brand-link" aria-label="같은 가계부 홈">
+        <svg class="brand__icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+          <rect x="3" y="4" width="18" height="16" rx="3" fill="none" stroke="currentColor" stroke-width="2"/>
+          <path d="M3 9h18" stroke="currentColor" stroke-width="2"/>
+          <path d="M7 14h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span>같은 가계부</span>
+      </a>
+      <div class="topbar__actions" id="topbar-actions" hidden>
+        <span class="file-chip" id="file-chip" title=""></span>
+        <label class="btn btn--ghost btn--sm">
+          다른 CSV 올리기
+          <input type="file" id="file-input-replace" accept=".csv,text/csv,text/plain" hidden>
+        </label>
+        <button class="btn btn--ghost btn--sm" id="btn-clear" type="button">데이터 지우기</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <!-- 업로드 화면 -->
+    <section id="upload-view" class="upload" aria-labelledby="upload-title">
+      <h1 id="upload-title" class="upload__title">CSV를 올리면 지출을 정리해 드려요</h1>
+      <p class="upload__lead">카드사·은행에서 내려받은 거래 내역 CSV 파일을 올리면 월별·카테고리별 순지출을 한눈에 볼 수 있습니다. 파일은 이 브라우저 안에서만 처리되고 어디에도 전송되지 않습니다.</p>
+
+      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="CSV 파일 선택 또는 끌어다 놓기">
+        <svg class="dropzone__icon" viewBox="0 0 48 48" width="48" height="48" aria-hidden="true">
+          <path d="M14 34a8 8 0 0 1-1-15.9A11 11 0 0 1 34 15a8 8 0 0 1 2 15.7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M24 40V22m0 0-6 6m6-6 6 6" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="dropzone__title">CSV 파일을 여기에 끌어다 놓거나<br>눌러서 선택하세요</p>
+        <p class="dropzone__hint">UTF-8 CSV · 첫 줄은 열 이름</p>
+        <input type="file" id="file-input" accept=".csv,text/csv,text/plain" hidden>
+      </div>
+
+      <div class="alert alert--error" id="upload-error" role="alert" hidden></div>
+
+      <section class="help" aria-labelledby="help-title">
+        <h2 id="help-title" class="help__title">파일 형식 안내</h2>
+        <table class="help__table">
+          <thead>
+            <tr><th scope="col">열 이름</th><th scope="col">설명</th><th scope="col">필수</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>date</code></td><td>거래일, <code>YYYY-MM-DD</code></td><td>필수</td></tr>
+            <tr><td><code>merchant</code></td><td>가맹점 이름</td><td>필수</td></tr>
+            <tr><td><code>category</code></td><td>분류 (식비, 교통 등)</td><td>필수</td></tr>
+            <tr><td><code>amount_krw</code></td><td>금액(원), 숫자</td><td>필수</td></tr>
+            <tr><td><code>type</code></td><td><code>expense</code>(지출) 또는 <code>refund</code>(환불). 비우면 지출로 처리</td><td>선택</td></tr>
+            <tr><td><code>transaction_id</code></td><td>거래 번호</td><td>선택</td></tr>
+          </tbody>
+        </table>
+        <p class="help__note">한글 열 이름(날짜·가맹점·분류·금액·유형)도 인식합니다. 순지출은 지출 합계에서 환불을 뺀 값입니다.</p>
+        <pre class="help__sample" aria-label="CSV 예시">transaction_id,date,merchant,category,amount_krw,type
+A01,2026-08-02,예제마트,식료품,42000,expense
+A02,2026-08-03,예제교통,교통,1500,expense</pre>
+      </section>
+    </section>
+
+    <!-- 대시보드 화면 -->
+    <section id="dashboard-view" class="dashboard" hidden>
+      <div class="alert alert--warn" id="import-warning" hidden></div>
+
+      <div class="toolbar">
+        <div class="month-nav" role="group" aria-label="월 필터">
+          <button class="iconbtn" id="month-prev" type="button" aria-label="이전 달">
+            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M12.5 4 7 10l5.5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <select class="select" id="month-select" aria-label="표시할 월 선택"></select>
+          <button class="iconbtn" id="month-next" type="button" aria-label="다음 달">
+            <svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M7.5 4 13 10l-5.5 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <button class="btn btn--primary" id="btn-export" type="button">
+          <svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M10 3v10m0 0-4-4m4 4 4-4M4 16h12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          CSV 내려받기
+        </button>
+      </div>
+
+      <section class="stats" aria-label="요약">
+        <div class="stat stat--hero">
+          <span class="stat__label"><span id="stat-scope">전체 기간</span> 순지출</span>
+          <span class="stat__value" id="stat-net">0원</span>
+          <span class="stat__sub" id="stat-net-sub"></span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">지출 합계</span>
+          <span class="stat__value stat__value--sm" id="stat-expense">0원</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">환불 합계</span>
+          <span class="stat__value stat__value--sm" id="stat-refund">0원</span>
+        </div>
+        <div class="stat">
+          <span class="stat__label">거래 건수</span>
+          <span class="stat__value stat__value--sm" id="stat-count">0건</span>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="month-title">
+        <div class="card__head">
+          <h2 id="month-title" class="card__title">월별 순지출</h2>
+          <span class="card__hint" id="month-hint">막대를 누르면 그 달만 봅니다</span>
+        </div>
+        <div class="barlist" id="month-bars"></div>
+      </section>
+
+      <section class="card" aria-labelledby="category-title">
+        <div class="card__head">
+          <h2 id="category-title" class="card__title">카테고리별 순지출</h2>
+          <span class="card__hint" id="category-scope">전체 기간</span>
+        </div>
+        <div class="barlist" id="category-bars"></div>
+        <p class="empty" id="category-empty" hidden>이 기간에는 거래가 없습니다.</p>
+      </section>
+
+      <section class="card" aria-labelledby="tx-title">
+        <div class="card__head">
+          <h2 id="tx-title" class="card__title">거래 내역 <span class="card__count" id="tx-count"></span></h2>
+          <span class="card__hint" id="tx-hint">최근 거래부터</span>
+        </div>
+        <table class="tx" id="tx-table">
+          <thead>
+            <tr>
+              <th scope="col" class="tx__date">날짜</th>
+              <th scope="col" class="tx__merchant">가맹점</th>
+              <th scope="col" class="tx__category">분류</th>
+              <th scope="col" class="tx__amount">금액</th>
+            </tr>
+          </thead>
+          <tbody id="tx-body"></tbody>
+        </table>
+        <p class="empty" id="tx-empty" hidden>이 기간에는 거래가 없습니다.</p>
+      </section>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>업로드한 데이터와 선택한 월은 이 브라우저의 저장 공간(localStorage)에만 보관됩니다. 모든 거래는 가상 데이터입니다.</p>
+  </footer>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="js/ledger.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

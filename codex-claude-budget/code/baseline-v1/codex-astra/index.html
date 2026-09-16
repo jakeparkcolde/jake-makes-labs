@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>차곡 · 나의 CSV 가계부</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="ledger.js"></script>
+  <script defer src="app.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./index.html" aria-label="차곡 가계부 홈"><span class="brand-icon" aria-hidden="true">▥</span>차곡<span class="brand-caption">나의 CSV 가계부</span></a>
+    <span class="local-badge"><span aria-hidden="true">●</span> 이 브라우저에만 저장</span>
+  </header>
+  <main>
+    <div class="page-heading">
+      <div><p class="eyebrow">MY LITTLE LEDGER</p><h1 id="page-title">지출의 흐름을, 한눈에.</h1><p class="subtitle" id="page-subtitle">CSV 한 장으로 시작하는 가벼운 돈 관리</p></div>
+      <button class="button secondary" id="replace-button" type="button" hidden>CSV 다시 올리기 <span aria-hidden="true">↗</span></button>
+    </div>
+
+    <input id="file-input" type="file" accept=".csv,text/csv" hidden>
+    <p id="error-message" class="message error" role="alert" hidden></p>
+    <p id="storage-message" class="message warning" role="status" hidden></p>
+    <p id="upload-status" class="sr-only" role="status" aria-live="polite"></p>
+
+    <section id="welcome" aria-labelledby="upload-title">
+      <div class="upload-card" id="drop-zone">
+        <div class="upload-icon" aria-hidden="true"><svg width="32" height="32" viewBox="0 0 32 32" fill="none"><path d="M10 3h9l6 6v19H7V3h3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M19 3v7h6M16 23V14m-4 4 4-4 4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <span class="small-label">첫 기록을 시작해 보세요</span>
+        <h2 id="upload-title">지출 CSV를 올려주세요</h2>
+        <p>파일을 여기에 끌어 놓거나<br>아래 버튼으로 선택해 주세요.</p>
+        <button class="button primary" id="upload-button" type="button">CSV 파일 선택 <span aria-hidden="true">＋</span></button>
+        <p class="upload-note">UTF-8 CSV · 파일은 외부로 전송되지 않아요</p>
+      </div>
+      <div class="intro-grid">
+        <article><span class="step">01</span><h3>월별로 살펴보고</h3><p>전체 기간과 월별 지출을<br>간편하게 오가세요.</p></article>
+        <article><span class="step">02</span><h3>어디에 썼는지 확인하고</h3><p>분류별 합계와 차트로<br>지출의 비중을 살펴보세요.</p></article>
+        <article><span class="step">03</span><h3>필요한 기록만 내려받기</h3><p>선택한 기간의 거래를<br>CSV로 다시 저장하세요.</p></article>
+      </div>
+      <details class="format-help"><summary>어떤 CSV를 올릴 수 있나요?</summary><p>제공된 <code>inputs/01-basic.csv</code>를 선택해 시작하세요. 필수 열은 <code>transaction_id, date, merchant, category, amount_krw, type</code>입니다. 날짜는 YYYY-MM-DD, 금액은 0 이상의 정수, 유형은 지출 <code>expense</code> 또는 환급 <code>refund</code>를 사용합니다. <code>original_transaction_id</code>는 선택 열입니다.</p></details>
+    </section>
+
+    <section id="dashboard" aria-label="지출 현황" hidden>
+      <div class="filter-row">
+        <div class="source-info"><span class="file-dot" aria-hidden="true"></span><span id="source-name"></span><span id="source-count" class="muted"></span></div>
+        <div class="month-control"><label for="month-select">조회 기간</label><select id="month-select"><option value="all">전체 기간</option></select></div>
+      </div>
+      <div class="summary-grid">
+        <article class="summary-card main-summary"><div class="card-label"><h2>순지출</h2><span id="period-label">전체 기간</span></div><p class="metric" id="net-total">0<span>원</span></p><p class="metric-note" id="all-total"></p></article>
+        <article class="summary-card"><div class="card-label"><h2>지출 합계</h2><span class="metric-symbol" aria-hidden="true">↗</span></div><p class="metric" id="expense-total"></p><p class="metric-note" id="expense-count"></p></article>
+        <article class="summary-card"><div class="card-label"><h2>환급 합계</h2><span class="metric-symbol refund" aria-hidden="true">↙</span></div><p class="metric" id="refund-total"></p><p class="metric-note" id="refund-count"></p></article>
+      </div>
+      <div class="panel category-panel">
+        <div class="section-heading"><div><p class="eyebrow">SPENDING BREAKDOWN</p><h2>어디에 사용했나요?</h2></div><span class="pill">분류별 순지출</span></div>
+        <ul id="category-chart" class="category-chart" aria-label="카테고리별 순지출 막대 차트"></ul>
+        <p class="chart-note">지출 − 환급 기준 · 막대 길이는 각 분류의 순지출 절댓값에 비례합니다.</p>
+      </div>
+      <section class="panel transactions-panel" aria-labelledby="transactions-title">
+        <div class="section-heading"><div><p class="eyebrow">TRANSACTIONS</p><h2 id="transactions-title">거래 내역 <span id="filtered-count" class="count"></span></h2></div><button id="export-button" class="button secondary compact" type="button"><span aria-hidden="true">↓</span> CSV 내려받기</button></div>
+        <p class="list-note">최신 날짜순 · 환급은 순지출에서 차감됩니다.</p>
+        <div class="transaction-header" aria-hidden="true"><span>날짜</span><span>가맹점</span><span>분류</span><span>금액</span></div>
+        <ul id="transaction-list" class="transaction-list" aria-label="선택한 기간의 거래"></ul>
+      </section>
+    </section>
+    <footer><span class="footer-brand">차곡</span><p>나의 기록이 차곡차곡, 더 선명해지는 소비 습관.</p><span>KRW · 원화 기준</span></footer>
+  </main>
+</body>
+</html>

@@ -9,3 +9,7 @@
 ## Manim으로 설명 애니메이션 만들기
 
 [실습 코드, 요청문, 설치 안내와 실제 MP4](manim/)
+
+## Codex vs Claude · 가계부 비교
+
+[동일한 CSV·요청문으로 만든 수정 전후 코드와 공통 검수 기록](codex-claude-budget/)
